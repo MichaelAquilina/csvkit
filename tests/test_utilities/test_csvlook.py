@@ -26,6 +26,23 @@ class TestCSVLook(unittest.TestCase):
         self.assertEqual(next(input_file), '|  1 | 2 | 3  |\n')
         self.assertEqual(next(input_file), '|  1 | 4 | 5  |\n')
         self.assertEqual(next(input_file), '|----+---+----|\n')
+        self.assertRaises(StopIteration, next, input_file)
+
+    def test_phabricator(self):
+        args = ['examples/dummy3.csv', '--phabricator']
+        output_file = six.StringIO()
+        utility = CSVLook(args, output_file)
+
+        utility.main()
+
+        input_file = six.StringIO(output_file.getvalue())
+
+        self.assertEqual(next(input_file), '|----|---|----|\n')
+        self.assertEqual(next(input_file), '|  a | b | c  |\n')
+        self.assertEqual(next(input_file), '|----|---|----|\n')
+        self.assertEqual(next(input_file), '|  1 | 2 | 3  |\n')
+        self.assertEqual(next(input_file), '|  1 | 4 | 5  |\n')
+        self.assertRaises(StopIteration, next, input_file)
 
     def test_truncate(self):
         args = ['examples/dummy4.csv', '--truncate', '3']
@@ -60,6 +77,7 @@ class TestCSVLook(unittest.TestCase):
         self.assertEqual(next(input_file), '|  1       | 2       | 3        |\n')
         self.assertEqual(next(input_file), '|  4       | 5       | 6        |\n')
         self.assertEqual(next(input_file), '|----------+---------+----------|\n')
+        self.assertRaises(StopIteration, next, input_file)
 
     def test_unicode(self):
         args = ['examples/test_utf8.csv']
@@ -77,4 +95,5 @@ class TestCSVLook(unittest.TestCase):
         self.assertEqual(next(input_file), '|  1 | 2 | 3  |\n')
         self.assertEqual(next(input_file), u'|  4 | 5 | ʤ  |\n')
         self.assertEqual(next(input_file), '|----+---+----|\n')
+        self.assertRaises(StopIteration, next, input_file)
 

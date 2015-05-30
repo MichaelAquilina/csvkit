@@ -14,6 +14,8 @@ class CSVLook(CSVKitUtility):
     def add_arguments(self):
         self.argparser.add_argument('--truncate', '-T', type=int, dest='truncate',
             help='Truncate the output to the first n rows.')
+        self.argparser.add_argument('--phabricator', '-P', action='store_true', dest='phabricator',
+            help='Use phabricator styled output.')
 
     def main(self):
         rows = CSVKitReader(self.input_file, **self.reader_kwargs)
@@ -56,9 +58,13 @@ class CSVLook(CSVKitUtility):
                 except IndexError:
                     widths.append(len(v))
 
-        # Dashes span each width with '+' character at intersection of
-        # horizontal and vertical dividers.
-        divider = '|--' + '-+-'.join('-'* w for w in widths) + '--|'
+        if self.args.phabricator:
+            # Use phabricator styled headers for direct copying
+            divider = '|--' + '-|-'.join('-'* w for w in widths) + '--|'
+        else:
+            # Dashes span each width with '+' character at intersection of
+            # horizontal and vertical dividers.
+            divider = '|--' + '-+-'.join('-'* w for w in widths) + '--|'
 
         self.output_file.write('%s\n' % divider)
 
@@ -70,9 +76,10 @@ class CSVLook(CSVKitUtility):
                     d = ''
                 output.append(' %s ' % six.text_type(d).ljust(widths[j]))
 
-            self.output_file.write('| %s |\n' % ('|'.join(output)))
+            self.output_file.write('| %s |\n'
+ % ('|'.join(output)))
 
-            if (i == 0 or i == len(rows) - 1):
+            if (i == 0) or (not self.args.phabricator and i == len(rows) - 1):
                 self.output_file.write('%s\n' % divider)
 
 def launch_new_instance():
